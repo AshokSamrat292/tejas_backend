@@ -4,11 +4,12 @@ const cors = require('cors');
 const axios = require('axios');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000; // ✅ this is important on Render
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
 let latestData = {};
 
 app.post('/api/sensors', (req, res) => {
@@ -21,9 +22,6 @@ app.post('/api/sensors', (req, res) => {
     timestamp: new Date().toLocaleString()
   };
   console.log("Received sensor data:", latestData);
-  if (latestData.fireDetected) {
-    sendTelegramAlert(`■ FIRE DETECTED!\nLDR: ${ldr}, Temp: ${temp}°C, Smoke: ${smoke}`);
-  }
   res.sendStatus(200);
 });
 
@@ -31,15 +29,6 @@ app.get('/api/sensors', (req, res) => {
   res.json(latestData);
 });
 
-function sendTelegramAlert(message) {
-  const botToken = 'your_telegram_bot_token';
-  const chatId = 'your_chat_id';
-  axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-    chat_id: chatId,
-    text: message
-  });
-}
-
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
